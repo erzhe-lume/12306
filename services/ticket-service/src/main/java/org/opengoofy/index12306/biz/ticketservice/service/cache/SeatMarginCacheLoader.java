@@ -68,6 +68,7 @@ public class SeatMarginCacheLoader {
         try {
             StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) distributedCache.getInstance();
             Object quantityObj = stringRedisTemplate.opsForHash().get(TRAIN_STATION_REMAINING_TICKET + keySuffix, seatType);
+            //判断缓存是否为空
             if (CacheUtil.isNullOrBlank(quantityObj)) {
                 TrainDO trainDO = distributedCache.safeGet(
                         TRAIN_INFO + trainId,
