@@ -37,7 +37,6 @@ import org.opengoofy.index12306.framework.starter.convention.exception.RemoteExc
 import org.opengoofy.index12306.framework.starter.convention.exception.ServiceException;
 import org.opengoofy.index12306.framework.starter.convention.result.Result;
 import org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractStrategyChoose;
-import org.opengoofy.index12306.frameworks.starter.user.core.UserContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public final class TrainSeatTypeSelector {
     private final AbstractStrategyChoose abstractStrategyChoose;
     private final ThreadPoolExecutor selectSeatThreadPoolExecutor;
 
-    public List<TrainPurchaseTicketRespDTO> select(Integer trainType, PurchaseTicketReqDTO requestParam) {
+    public List<TrainPurchaseTicketRespDTO> select(Integer trainType, PurchaseTicketReqDTO requestParam, String username) {
         List<PurchaseTicketPassengerDetailDTO> passengerDetails = requestParam.getPassengers();
         Map<Integer, List<PurchaseTicketPassengerDetailDTO>> seatTypeMap = passengerDetails.stream()
                 .collect(Collectors.groupingBy(PurchaseTicketPassengerDetailDTO::getSeatType));
@@ -100,15 +99,15 @@ public final class TrainSeatTypeSelector {
         Result<List<PassengerRespDTO>> passengerRemoteResult;
         List<PassengerRespDTO> passengerRemoteResultList;
         try {
-            passengerRemoteResult = userRemoteService.listPassengerQueryByIds(UserContext.getUsername(), passengerIds);
+            passengerRemoteResult = userRemoteService.listPassengerQueryByIds(username, passengerIds);
             if (!passengerRemoteResult.isSuccess() || CollUtil.isEmpty(passengerRemoteResultList = passengerRemoteResult.getData())) {
                 throw new RemoteException("用户服务远程调用查询乘车人相关信息错误");
             }
         } catch (Throwable ex) {
             if (ex instanceof RemoteException) {
-                log.error("用户服务远程调用查询乘车人相关信息错误，当前用户：{}，请求参数：{}", UserContext.getUsername(), passengerIds);
+                log.error("用户服务远程调用查询乘车人相关信息错误，当前用户：{}，请求参数：{}", username, passengerIds);
             } else {
-                log.error("用户服务远程调用查询乘车人相关信息错误，当前用户：{}，请求参数：{}", UserContext.getUsername(), passengerIds, ex);
+                log.error("用户服务远程调用查询乘车人相关信息错误，当前用户：{}，请求参数：{}", username, passengerIds, ex);
             }
             throw ex;
         }
