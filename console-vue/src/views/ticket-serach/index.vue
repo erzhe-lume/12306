@@ -1355,7 +1355,9 @@ const handleBook = (record) => {
               <div>一等卧</div>
             </template>
             <template #operation="{ text, record }">
+              <!-- 有余票时展示"预定"，余票售罄时展示"候补"，均进入购票页选择席别提交 -->
               <Button
+                  v-if="record.seatClassList.filter((item) => item.quantity)?.length"
                   type="link"
                   size="small"
                   @click="
@@ -1363,10 +1365,20 @@ const handleBook = (record) => {
                   handleBook(record)
                 }
               "
-                  :disabled="
-                !record.seatClassList.filter((item) => item.quantity)?.length
+                  >预定
+              </Button
+              >
+              <Button
+                  v-else
+                  type="link"
+                  size="small"
+                  :style="{ color: '#ff8001' }"
+                  @click="
+                () => {
+                  handleBook(record)
+                }
               "
-              >预定
+                  >候补
               </Button
               >
             </template>

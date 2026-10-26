@@ -42,6 +42,9 @@
           <Item key="order"
             ><RouterLink to="/ticketList">车票订单</RouterLink>
           </Item>
+          <Item key="candidateOrder">
+            <RouterLink to="/candidateOrder">候补订单</RouterLink>
+          </Item>
           <Item key="personalTicket">
             <RouterLink to="/personalTicket">本人车票</RouterLink>
           </Item>

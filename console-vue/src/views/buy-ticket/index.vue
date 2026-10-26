@@ -155,6 +155,21 @@
             "
             >提交订单</Button
           >
+          <!-- 候补下单入口：所选席别余票不足时，可提交候补订单等待放票兑现 -->
+          <Button
+            :loading="state.candidateLoading"
+            :style="{
+              backgroundColor: '#3e9df5',
+              color: '#fff',
+              border: 'none'
+            }"
+            @click="
+              () => {
+                handleSubmitCandidate()
+              }
+            "
+            >提交候补订单</Button
+          >
         </Space>
       </div>
       <div class="tips-txt">
@@ -384,7 +399,8 @@ import { useRoute } from 'vue-router'
 import {
   fetchTicketSearch,
   fetchPassengerList,
-  fetchBuyTicket
+  fetchBuyTicket,
+  fetchCandidateCreate
 } from '@/service'
 import { onMounted, reactive, toRaw, watch, ref } from 'vue'
 import { getWeekNumber } from '@/utils'
@@ -411,7 +427,8 @@ const state = reactive({
   isChooseSeat: true,
   seatLeft: 3,
   seatNumber: 5,
-  loading: false
+  loading: false,
+  candidateLoading: false
 })
 const currPassenger = ref([])
 
@@ -671,6 +688,51 @@ const handleSubmitBuyTicket = () => {
       state.loading = false
       console.log(error)
     })
+}
+
+// 提交候补订单：所选席别余票不足或暂时无票时，进入候补队列等待兑现
+const handleSubmitCandidate = () => {
+  const canNotSubmit = state.dataSource.some(
+    (item) => item.seatType === null || item.seatType === undefined
+  )
+  if (canNotSubmit || state.dataSource?.length === 0) {
+    return message.error('请补全信息')
+  }
+  Modal.confirm({
+    title: '候补订单确认',
+    content:
+      '提交候补订单后，系统将在有余票时自动为您兑现，兑现成功后需在规定时间内完成支付，确认提交吗？',
+    okText: '确认候补',
+    cancelText: '再想想',
+    onOk: () => {
+      const params = {
+        trainId: query?.trainId,
+        passengers: state.dataSource.map((item) => ({
+          passengerId: item.id,
+          seatType: item.seatType
+        })),
+        departure: state.currTrain?.departure,
+        arrival: state.currTrain?.arrival
+      }
+      state.candidateLoading = true
+      return fetchCandidateCreate(params)
+        .then((res) => {
+          if (res.success) {
+            message.success('候补订单提交成功，正在跳转至候补订单页面')
+            setTimeout(() => {
+              router.push('/candidateOrder')
+            }, 500)
+          } else {
+            message.error(res.message)
+          }
+          state.candidateLoading = false
+        })
+        .catch((error) => {
+          state.candidateLoading = false
+          console.log(error)
+        })
+    }
+  })
 }
 </script>
 

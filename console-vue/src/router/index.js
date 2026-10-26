@@ -13,6 +13,7 @@ import AliPay from '../views/ali-pay'
 import TikectList from '../views/order-list'
 import PersonalTicket from '../views/personalTicket'
 import PaySuccess from '../views/pay-success'
+import CandidateOrder from '../views/candidate-order'
 import Cookies from 'js-cookie'
 const routes = [
   {
@@ -127,6 +128,14 @@ const routes = [
     component: PaySuccess,
     icon: 'icon-zhifuchenggong',
     meta: { requiresAuth: false }
+  },
+  {
+    label: '候补订单',
+    path: '/candidateOrder',
+    name: 'candidateOrder',
+    component: CandidateOrder,
+    icon: 'icon-dingdan',
+    meta: { requiresAuth: true }
   }
 ]
 

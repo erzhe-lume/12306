@@ -209,6 +209,17 @@ const CHECK_STATUS = [
     label: '未通过'
   }
 ]
+
+// 候补订单状态映射（与后端 CandidateOrderStatusEnum 保持一致）
+const CANDIDATE_ORDER_STATUS_LIST = [
+  { value: 0, label: '等待中', color: 'processing' },
+  { value: 1, label: '分配中', color: 'processing' },
+  { value: 2, label: '待支付', color: 'warning' },
+  { value: 3, label: '已完成', color: 'success' },
+  { value: 4, label: '已失败', color: 'error' },
+  { value: 5, label: '已取消', color: 'default' },
+  { value: 6, label: '已过期', color: 'error' }
+]
 export {
   TICKET_TYPE_LIST,
   SEAT_NAME_MAP,
@@ -220,5 +231,6 @@ export {
   DISCOUNTS_TYPE,
   REGIN_MAP,
   CHECK_STATUS,
-  TRAIN_TAG
+  TRAIN_TAG,
+  CANDIDATE_ORDER_STATUS_LIST
 }

@@ -188,6 +188,45 @@ const fetchRefundTicket = async (body) => {
   })
 }
 
+// 创建候补订单
+const fetchCandidateCreate = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ticket-service/candidate-order/create',
+    data: body
+  })
+  return data
+}
+
+// 查询当前登录用户的候补订单列表
+const fetchCandidateOrderList = async () => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ticket-service/candidate-order/list'
+  })
+  return data
+}
+
+// 按候补订单号查询单条候补订单
+const fetchCandidateOrderQuery = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ticket-service/candidate-order/query',
+    params
+  })
+  return data
+}
+
+// 取消候补订单
+const fetchCandidateCancel = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/ticket-service/candidate-order/cancel',
+    data: body
+  })
+  return data
+}
+
 export {
   fetchLogin,
   fetchRegister,
@@ -209,5 +248,9 @@ export {
   fetchOrderStatus,
   fetchUserUpdate,
   fetchMyTicket,
-  fetchRefundTicket
+  fetchRefundTicket,
+  fetchCandidateCreate,
+  fetchCandidateOrderList,
+  fetchCandidateOrderQuery,
+  fetchCandidateCancel
 }
