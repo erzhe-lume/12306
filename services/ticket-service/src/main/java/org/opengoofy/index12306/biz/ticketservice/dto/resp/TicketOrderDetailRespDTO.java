@@ -71,4 +71,9 @@ public class TicketOrderDetailRespDTO {
      * 订单金额
      */
     private Integer amount;
+
+    /**
+     * 乘车人 ID，用于回写候补明细
+     */
+    private String passengerId;
 }

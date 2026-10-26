@@ -83,4 +83,9 @@ public class TicketOrderDetailRespDTO {
      * 乘车人订单详情
      */
     private List<TicketOrderPassengerDetailRespDTO> passengerDetails;
+
+    /**
+     * 乘车人 ID，用于回写候补明细
+     */
+    private String passengerId;
 }

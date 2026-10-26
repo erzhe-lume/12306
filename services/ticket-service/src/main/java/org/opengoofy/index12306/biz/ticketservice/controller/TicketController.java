@@ -18,10 +18,7 @@
 package org.opengoofy.index12306.biz.ticketservice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.RefundTicketReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
+import org.opengoofy.index12306.biz.ticketservice.dto.req.*;
 import org.opengoofy.index12306.biz.ticketservice.dto.resp.RefundTicketRespDTO;
 import org.opengoofy.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import org.opengoofy.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
@@ -34,6 +31,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.opengoofy.index12306.biz.ticketservice.dto.resp.CandidateOrderCreateRespDTO;
+import org.opengoofy.index12306.biz.ticketservice.dto.resp.CandidateOrderQueryRespDTO;
+
+import java.util.List;
 
 /**
  * 车票控制层
@@ -92,5 +93,38 @@ public class TicketController {
     @PostMapping("/api/ticket-service/ticket/refund")
     public Result<RefundTicketRespDTO> commonTicketRefund(@RequestBody RefundTicketReqDTO requestParam) {
         return Results.success(ticketService.commonTicketRefund(requestParam));
+    }
+
+    /*
+    候补订单创建接口
+     */
+    @PostMapping("/api/ticket-service/candidate-order/create")
+    public Result<CandidateOrderCreateRespDTO> createCandidateOrder(@RequestBody CandidateOrderCreateReqDTO requestParam) {
+        return Results.success(ticketService.createCandidateOrder(requestParam));
+    }
+
+    /*
+    候补订单取消接口
+     */
+    @PostMapping("/api/ticket-service/candidate-order/cancel")
+    public Result<Void> cancelCandidateOrder(@RequestBody CandidateOrderCancelReqDTO requestParam) {
+        ticketService.cancelCandidateOrder(requestParam);
+        return Results.success();
+    }
+
+    /*
+    候补订单查询接口（按候补订单号查询单条）
+     */
+    @GetMapping("/api/ticket-service/candidate-order/query")
+    public Result<CandidateOrderQueryRespDTO> queryCandidateOrder(CandidateOrderQueryReqDTO requestParam) {
+        return Results.success(ticketService.queryCandidateOrder(requestParam));
+    }
+
+    /*
+    候补订单列表查询接口（查询当前登录用户的全部候补订单）
+     */
+    @GetMapping("/api/ticket-service/candidate-order/list")
+    public Result<List<CandidateOrderQueryRespDTO>> listCandidateOrder() {
+        return Results.success(ticketService.listCandidateOrder());
     }
 }

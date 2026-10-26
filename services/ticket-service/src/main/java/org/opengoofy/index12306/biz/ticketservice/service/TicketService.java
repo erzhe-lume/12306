@@ -19,15 +19,12 @@ package org.opengoofy.index12306.biz.ticketservice.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.opengoofy.index12306.biz.ticketservice.dao.entity.TicketDO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.RefundTicketReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.resp.RefundTicketRespDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
-import org.opengoofy.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
+import org.opengoofy.index12306.biz.ticketservice.dto.req.*;
+import org.opengoofy.index12306.biz.ticketservice.dto.resp.*;
 import org.opengoofy.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 /**
  * 车票接口
@@ -77,6 +74,15 @@ public interface TicketService extends IService<TicketDO> {
     TicketPurchaseRespDTO executePurchaseTickets(@RequestBody PurchaseTicketReqDTO requestParam);
 
     /**
+     * 尝试为候补订单分配车票
+     *
+     * @param candidateOrderSn 候补订单号
+     * @param requestParam 购票参数
+     * @return 正式订单和车票信息
+     */
+    TicketPurchaseRespDTO allocateCandidateOrder(String candidateOrderSn);
+
+    /**
      * 支付单详情查询
      *
      * @param orderSn 订单号
@@ -98,4 +104,25 @@ public interface TicketService extends IService<TicketDO> {
      * @return 退款返回详情
      */
     RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam);
+
+
+    /*
+    创建候补订单
+     */
+    CandidateOrderCreateRespDTO createCandidateOrder(CandidateOrderCreateReqDTO requestParam);
+
+    /*
+   查询候补订单
+     */
+    CandidateOrderQueryRespDTO queryCandidateOrder(CandidateOrderQueryReqDTO requestParam);
+
+    /*
+    查询当前登录用户的所有候补订单（按创建时间倒序）
+     */
+    List<CandidateOrderQueryRespDTO> listCandidateOrder();
+
+    /*
+    取消候补订单
+     */
+    void cancelCandidateOrder(CandidateOrderCancelReqDTO requestParam);
 }

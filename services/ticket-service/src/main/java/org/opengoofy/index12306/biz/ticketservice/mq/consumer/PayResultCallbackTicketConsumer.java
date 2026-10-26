@@ -24,8 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.opengoofy.index12306.biz.ticketservice.common.constant.TicketRocketMQConstant;
+import org.opengoofy.index12306.biz.ticketservice.common.enums.CandidateOrderStatusEnum;
 import org.opengoofy.index12306.biz.ticketservice.common.enums.SeatStatusEnum;
+import org.opengoofy.index12306.biz.ticketservice.dao.entity.CandidateOrderDO;
+import org.opengoofy.index12306.biz.ticketservice.dao.entity.CandidateOrderItemDO;
 import org.opengoofy.index12306.biz.ticketservice.dao.entity.SeatDO;
+import org.opengoofy.index12306.biz.ticketservice.dao.mapper.CandidateOrderItemMapper;
+import org.opengoofy.index12306.biz.ticketservice.dao.mapper.CandidateOrderMapper;
 import org.opengoofy.index12306.biz.ticketservice.dao.mapper.SeatMapper;
 import org.opengoofy.index12306.biz.ticketservice.mq.domain.MessageWrapper;
 import org.opengoofy.index12306.biz.ticketservice.mq.event.PayResultCallbackTicketEvent;
@@ -58,6 +63,8 @@ public class PayResultCallbackTicketConsumer implements RocketMQListener<Message
 
     private final TicketOrderRemoteService ticketOrderRemoteService;
     private final SeatMapper seatMapper;
+    private final CandidateOrderMapper candidateOrderMapper;
+    private final CandidateOrderItemMapper candidateOrderItemMapper;
 
     @Idempotent(
             uniqueKeyPrefix = "index12306-ticket:pay_result_callback:",
@@ -72,7 +79,7 @@ public class PayResultCallbackTicketConsumer implements RocketMQListener<Message
         Result<TicketOrderDetailRespDTO> ticketOrderDetailResult;
         try {
             ticketOrderDetailResult = ticketOrderRemoteService.queryTicketOrderByOrderSn(message.getMessage().getOrderSn());
-            if (!ticketOrderDetailResult.isSuccess() && Objects.isNull(ticketOrderDetailResult.getData())) {
+            if (!ticketOrderDetailResult.isSuccess() || Objects.isNull(ticketOrderDetailResult.getData())) {
                 throw new ServiceException("支付结果回调查询订单失败");
             }
         } catch (Throwable ex) {
@@ -92,5 +99,29 @@ public class PayResultCallbackTicketConsumer implements RocketMQListener<Message
             updateSeatDO.setSeatStatus(SeatStatusEnum.SOLD.getCode());
             seatMapper.update(updateSeatDO, updateWrapper);
         }
+        String formalOrderSn = message.getMessage().getOrderSn();
+        CandidateOrderDO candidateOrderDO = candidateOrderMapper.selectOne(Wrappers.lambdaQuery(CandidateOrderDO.class)
+                .eq(CandidateOrderDO::getFormalOrderSn, formalOrderSn)
+                .eq(CandidateOrderDO::getStatus, CandidateOrderStatusEnum.PENDING_PAYMENT.getCode())
+        );
+        if (candidateOrderDO != null) {
+            int orderUpdatedRows = candidateOrderMapper.update(null, Wrappers.lambdaUpdate(CandidateOrderDO.class)
+                    .set(CandidateOrderDO::getStatus, CandidateOrderStatusEnum.SUCCESS.getCode())
+                    .eq(CandidateOrderDO::getCandidateOrderSn, candidateOrderDO.getCandidateOrderSn())
+                    .eq(CandidateOrderDO::getStatus, CandidateOrderStatusEnum.PENDING_PAYMENT.getCode())
+            );
+            if (orderUpdatedRows != 1) {
+                throw new ServiceException("候补订单状态更新失败");
+            }
+            int itemUpdatedRows = candidateOrderItemMapper.update(null, Wrappers.lambdaUpdate(CandidateOrderItemDO.class)
+                    .set(CandidateOrderItemDO::getStatus, CandidateOrderStatusEnum.SUCCESS.getCode())
+                    .eq(CandidateOrderItemDO::getCandidateOrderSn, candidateOrderDO.getCandidateOrderSn())
+                    .eq(CandidateOrderItemDO::getStatus, CandidateOrderStatusEnum.PENDING_PAYMENT.getCode())
+            );
+            if (itemUpdatedRows == 0) {
+                throw new ServiceException("候补明细状态更新失败");
+            }
+        }
+        return;
     }
 }
