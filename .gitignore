@@ -31,3 +31,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### 本地运行产物 / 临时脚本（不属于项目代码）###
+*.log
+*-run.log
+*_run.log
+*_out.txt
+fg_out.txt
+pid_check.txt
+port_status.txt
+node_test*.js
+check_pid.js
+check_ports.js
+run_ticket_fg.js
+META-INF/
